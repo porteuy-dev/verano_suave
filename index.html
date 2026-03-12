@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Verano Frío | TONO APROBADO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0f0f0f; --txt: #f5f5f5; --accent: #0047FF; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; overflow-x: hidden; }
+        #landing { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .brand { font-family: 'Syne'; font-size: 0.9rem; letter-spacing: 6px; color: #888; text-transform: uppercase; margin-bottom: 15px; }
+        .main-title { font-family: 'Syne'; font-size: clamp(2.5rem, 10vw, 5rem); line-height: 1; margin: 0 0 40px; text-transform: uppercase; }
+        .btn-enter { background: #fff; color: #000; padding: 22px 50px; border: none; font-family: 'Syne'; font-weight: 800; text-transform: uppercase; cursor: pointer; border-radius: 60px; font-size: 1rem; transition: 0.3s; }
+        #grid-view { display: none; background: #fff; color: #111; min-height: 100vh; padding-bottom: 60px; }
+        .header { position: sticky; top: 0; background: #fff; z-index: 100; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .btn-back { background: none; border: 1px solid #000; padding: 8px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+        .content { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .cat-title { font-family: 'Syne'; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; margin: 40px 0 15px; display: flex; align-items: center; color: var(--accent); }
+        .cat-title::after { content: ""; flex: 1; height: 1px; background: #eee; margin-left: 15px; }
+        .sub-group-title { font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-bottom: 30px; }
+        .color-box { aspect-ratio: 1; border-radius: 10px; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
+        #viewer { position: fixed; inset: 0; z-index: 1000; display: none; flex-direction: column; background: #000; }
+        #v-color { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; position: relative; touch-action: pan-y; }
+        .v-close { position: absolute; top: 30px; right: 20px; background: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; font-weight: bold; cursor: pointer; z-index: 11; }
+        .v-info { background: #fff; color: #000; padding: 40px 20px; text-align: center; border-radius: 30px 30px 0 0; }
+        .v-info h3 { margin: 0; font-family: 'Syne'; font-size: 1.6rem; text-transform: uppercase; }
+        .v-info p { margin: 10px 0 0; color: #888; font-family: 'Inter'; font-weight: 600; }
+        .footer-legal { font-size: 0.7rem; text-align: center; padding: 40px; opacity: 0.4; }
+        @media (max-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+    </style>
+</head>
+<body>
+    <div id="landing">
+        <div class="brand">TONO APROBADO</div>
+        <h1 class="main-title">Verano Frío<br>
+        <button class="btn-enter" onclick="openGrid()">Ver Colorimetría</button>
+    </div>
+    <div id="grid-view">
+        <div class="header"><button class="btn-back" onclick="location.reload()">← VOLVER</button><div style="font-family:'Syne'; font-weight:800;">VERANO FRÍO</div></div>
+        <div class="content" id="main-content"></div>
+        <div class="footer-legal">© TONO APROBADO. Prohibido su uso o venta sin autorización.</div>
+    </div>
+    <div id="viewer">
+        <button class="v-close" onclick="closeViewer()">✕</button>
+        <div id="v-color"></div>
+        <div class="v-info"><h3 id="v-name"></h3><p id="v-hex"></p><small style="color:#ccc">Desliza para ver más</small></div>
+    </div>
+    <script>
+        const data = {
+            star: "Neutros fríos claros|#F2F2F2:Cool Soft White,#E1E1E6:Light Cool Gray,#9AA0B2:Cool Taupe Gray,#4A4E57:Soft Charcoal;Rosas fríos empolvados|#F6E6EF:Cool Blush,#EBC1D6:Powder Pink,#C98AAE:Dusty Rose,#B24C6F:Cool Raspberry;Lilacs y violetas|#E2DAF2:Soft Lavender,#B9A9DE:Cool Lilac,#8A76B8:Muted Violet,#5E507F:Cool Plum;Azules y Verdes|#D8E4F2:Powder Blue,#B7C6EA:Cool Periwinkle,#7FA9C9:Soft Denim Blue,#3B5B86:Cool Navy,#C6D9DC:Blue Sage,#9CCFC2:Cool Mint,#7A9FA8:Muted Teal,#3C7F80:Cool Blue Green",
+            comp: "Complementarios|#F4F7FA:C1,#E7ECF2:C2,#D3DAE6:C3,#BFC9D9:C4,#A9B4C8:C5,#8F9CB5:C6,#7C8AA6:C7,#6A7894:C8,#5A6A86:C9,#4B5C78:C10,#E9E3F1:C11,#D6CFE6:C12,#C2BCD9:C13,#AEA8CC:C14,#9A94BF:C15,#E6EEF0:C16,#D2E1E6:C17,#BED5DC:C18,#AAC9D1:C19,#96BDC6:C20,#D9E3DE:C21,#C6D6D2:C22,#B2CAC6:C23,#9EBDBA:C24,#8AB1AE:C25,#C9C9D3:C26,#B3B4C2:C27,#9DA0B1:C28,#878CA0:C29,#71788F:C30",
+            avoid: "Evitar|#FF8C00:Naranja Cálido,#FFD634:Amarillo Oro,#C19A6B:Camel,#000000:Negro Puro,#FFFFFF:Blanco Puro",
+            metal: "Metales|#C0C0C0:Plata,#EAEAEA:Oro Blanco,#E5E4E2:Platino"
+        };
+        let allCols = []; let curIdx = 0; let tStart = 0;
+        function init() {
+            renderCat("Colores Estrella", data.star); renderCat("Complementarios", data.comp);
+            renderCat("Qué Evitar", data.avoid); renderCat("Metales", data.metal);
+        }
+        function renderCat(n, d) {
+            let h = `<div class="cat-title">${n}</div>`;
+            d.split(';').forEach(g => {
+                const [t, cs] = g.split('|');
+                h += `<div class="sub-group-title">${t}</div><div class="grid">`;
+                cs.split(',').forEach(c => {
+                    const [hex, nm] = c.split(':');
+                    allCols.push({hex, nm}); const idx = allCols.length - 1;
+                    h += `<div class="color-box" style="background:${hex}" onclick="openViewer(${idx})"></div>`;
+                }); h += `</div>`;
+            }); document.getElementById('main-content').innerHTML += h;
+        }
+        function openGrid() { document.getElementById('landing').style.display='none'; document.getElementById('grid-view').style.display='block'; window.scrollTo(0,0); }
+        function openViewer(i) { curIdx = i; updateV(); document.getElementById('viewer').style.display='flex'; }
+        function updateV() {
+            const c = allCols[curIdx]; document.getElementById('v-color').style.backgroundColor = c.hex;
+            document.getElementById('v-name').innerText = c.nm; document.getElementById('v-hex').innerText = c.hex;
+        }
+        function closeViewer() { document.getElementById('viewer').style.display='none'; }
+        const vArea = document.getElementById('v-color');
+        vArea.addEventListener('touchstart', e => tStart = e.touches[0].clientX);
+        vArea.addEventListener('touchend', e => {
+            let tEnd = e.changedTouches[0].clientX;
+            if (tStart - tEnd > 50) { curIdx = (curIdx+1)%allCols.length; updateV(); }
+            if (tEnd - tStart > 50) { curIdx = (curIdx-1+allCols.length)%allCols.length; updateV(); }
+        });
+        init();
+    </script>
+</body>
+</html>
